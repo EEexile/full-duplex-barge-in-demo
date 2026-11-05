@@ -38,6 +38,11 @@ footer{color:var(--muted);font-size:13px;margin-top:18px}
 .branch.active{border-color:#52968d;background:#f0f8f6}
 .branch p{font-size:14px}
 .state{color:var(--accent);font-weight:700}
+header a{color:var(--accent);display:inline-block;margin-top:8px}
+details{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
+summary{cursor:pointer;font-weight:700}
+details p{margin:8px 0}
+textarea{display:block;width:100%;min-height:125px;padding:10px;border:1px solid #a1b3be;border-radius:7px;font:14px/1.5 monospace;color:var(--ink)}
 [hidden]{display:none !important}
 </style>
 </head>
@@ -47,6 +52,7 @@ footer{color:var(--muted);font-size:13px;margin-top:18px}
 <p class="eyebrow">FULL-DUPLEX · TURN CONTROL</p>
 <h1>AI 什么时候停？什么时候接话？</h1>
 <p>同一条麦克风输入，VAD 通过后根据 AI 的播放状态走不同的判断链路。</p>
+<a href="https://github.com/EEexile/full-duplex-barge-in-demo/archive/refs/heads/main.zip">下载离线 ZIP</a>
 </header>
 
 <section class="card" aria-labelledby="flow-title">
@@ -75,6 +81,7 @@ footer{color:var(--muted);font-size:13px;margin-top:18px}
 <option value="speech">AI 讲 · 普通发言连续确认</option>
 <option value="filter">AI 听 · VAD 过滤与无效过滤</option>
 <option value="backchannel">AI 听 · 附和通过有效性判断</option>
+<option value="custom" id="custom-option" disabled>自定义场景</option>
 </select></label>
 <label>停播所需连续有效次数 <select id="threshold"><option>2</option><option>3</option></select></label>
 </div>
@@ -96,8 +103,21 @@ footer{color:var(--muted);font-size:13px;margin-top:18px}
 <tbody id="timeline"></tbody>
 </table>
 </div>
+<details>
+<summary>用自己的分类结果试跑</summary>
+<p id="input-help">每行是一条 JSON 数组，依次填输入说明、四分类编号、可选的 TurnSense 结果。<code>null</code> 表示 VAD 未激活。只要模型能导出这些结果，就可以回放。</p>
+<form id="custom-form">
+<div class="controls"><label>起始状态 <select id="initial-mode"><option value="speaking">AI 讲</option><option value="listening">AI 听</option></select></label></div>
+<label for="custom-input">分类结果（每行一块）</label>
+<textarea id="custom-input" aria-describedby="input-help" spellcheck="false" required>["嗯嗯", 1]
+["等一下", 3]
+["我想查一下……", 2, "incomplete"]
+["上个月的账单", 2, "complete"]</textarea>
+<div class="controls"><button type="submit">载入自定义场景</button><span class="bad" id="custom-error" role="alert"></span></div>
+</form>
+</details>
 </section>
-<footer>每步 240 ms 为演示时钟。音频事件和模型输出为预设样例，页面实时执行分流、类别映射及交互规则。</footer>
+<footer>每步 240 ms 为演示时钟。页面对示例或导入的分类结果执行分流和交互规则。</footer>
 </main>
 
 <script>
@@ -159,7 +179,8 @@ const scenes = {
 
 const el = Object.fromEntries(
   ["scene", "threshold", "scenario", "play", "step", "reset", "clock", "status",
-    "comparison", "baseline", "policy", "timeline", "speaking-branch", "listening-branch"]
+    "comparison", "baseline", "policy", "timeline", "speaking-branch", "listening-branch",
+    "custom-option", "custom-form", "initial-mode", "custom-input", "custom-error"]
     .map((id) => [id, document.getElementById(id)])
 );
 let position, mode, consecutive, stopTime, lastAction, timer;
@@ -189,6 +210,7 @@ function decide(digit, turn, time) {
 
   // 0 → 无效，1/2/3 → 有效。TurnSense 只消费通过过滤的输入。
   if (digit === INVALID) return ["无效", "—", "忽略输入，继续听"];
+  if (turn == null) return ["有效", "—", "缺少 TurnSense 结果，继续听"];
   if (turn === "complete") {
     mode = "speaking";
     return ["有效", turnLabels[turn], "开始回复，转为 AI 讲"];
@@ -264,6 +286,40 @@ el.step.addEventListener("click", step);
 el.reset.addEventListener("click", reset);
 el.scene.addEventListener("change", reset);
 el.threshold.addEventListener("change", reset);
+el["custom-form"].addEventListener("submit", (event) => {
+  event.preventDefault();
+  const error = el["custom-error"];
+  error.textContent = "";
+  const lines = el["custom-input"].value.split(/\r?\n/);
+  const events = [];
+  for (const [index, line] of lines.entries()) {
+    if (!line.trim()) continue;
+    try {
+      const row = JSON.parse(line);
+      if (!Array.isArray(row) || row.length < 2 || row.length > 3) throw new Error();
+      const [sample, digit, turn] = row;
+      const validDigit = digit === null || (Number.isInteger(digit) && digit >= INVALID && digit <= INTERRUPT);
+      const validTurn = turn == null || (typeof turn === "string" && Object.hasOwn(turnLabels, turn));
+      if (typeof sample !== "string" || !sample.trim() || !validDigit || !validTurn) throw new Error();
+      events.push(row);
+    } catch {
+      error.textContent = `第 ${index + 1} 行格式有误。请填 ["说明", 0～3 或 null, 可选的 TurnSense 结果]。`;
+      return;
+    }
+  }
+  if (events.length === 0) {
+    error.textContent = "至少输入一块分类结果。";
+    return;
+  }
+  scenes.custom = {
+    initial: el["initial-mode"].value,
+    description: "已载入你提供的分类结果。点击单步推进或自动回放查看动作。",
+    events
+  };
+  el["custom-option"].disabled = false;
+  el.scene.value = "custom";
+  reset();
+});
 reset();
 </script>
 </body>

@@ -2,7 +2,26 @@
 
 AI 播报时遇到插话，要判断是否停下来。AI 听用户说话时，要判断是否该接话。这个浏览器演示把 VAD 之后的两条链路串起来，逐步展示每个判断如何改变对话状态。
 
-[在线体验 Demo](https://eeexile.github.io/full-duplex-barge-in-demo/) · [页面源码](index.html)
+[在线体验 Demo](https://eeexile.github.io/full-duplex-barge-in-demo/) · [下载离线 ZIP](https://github.com/EEexile/full-duplex-barge-in-demo/archive/refs/heads/main.zip) · [页面源码](index.html)
+
+## 快速开始
+
+打开在线页面，选择「完整对话 · 打断后继续说」，点击「单步推进」。离线使用时，下载并解压 ZIP，双击里面的 `index.html`。同一个文件包含界面和决策逻辑，普通浏览器即可运行。
+
+## 用自己的分类结果回放
+
+展开页面里的「用自己的分类结果试跑」，选择起始状态。每行填一块的结果，载入后可单步推进或自动回放。
+
+```text
+["嗯嗯", 1]
+["等一下", 3]
+["我想查一下……", 2, "incomplete"]
+["上个月的账单", 2, "complete"]
+```
+
+每行依次填写显示说明、四分类编号和可选的 TurnSense 结果。编号为 `0` 无效、`1` 附和、`2` 有效发言、`3` 明确打断，`null` 表示 VAD 未激活。TurnSense 结果可填 `complete`、`incomplete` 或 `invalid`。播报时只使用四分类结果。监听时，有效音频缺少 TurnSense 结果就继续听。
+
+这个仓库提供可运行的交互策略演示。音频推理在外部完成，页面读取预设示例或你导入的结果。想单独运行真实音频的轮次判断，可以参考 [TurnSense 官方仓库的快速开始](https://github.com/Bairong-Xdynamics/TurnSense#-快速开始)。
 
 ## 团队成果
 
@@ -46,4 +65,4 @@ flowchart TD
 3. 用户说「我想查一下……」，通过有效性判断，但 TurnSense 判为未完整，AI 继续等。
 4. 用户补完「上个月的账单」，TurnSense 判为完整，AI 开始回复并回到播报状态。
 
-页面支持 240 ms 模拟更新，逐步显示 VAD、四分类、二分类、TurnSense 和动作。播报噪声示例还可和持续激活 500 ms 的 VAD 基线对照。也可以下载后直接双击 `index.html`。模型输出与音频事件使用自编样例，浏览器执行路由、类别映射、停播和接话规则。
+页面支持 240 ms 模拟更新，逐步显示 VAD、四分类、二分类、TurnSense 和动作。播报噪声示例还可和持续激活 500 ms 的 VAD 基线对照。
