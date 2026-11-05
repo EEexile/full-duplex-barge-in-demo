@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全双工语音打断演示</title>
+<style>
+:root{color-scheme:light;--ink:#172535;--muted:#47586a;--line:#dbe3ea;--accent:#075b55;--paper:#fff}
+*{box-sizing:border-box}
+body{margin:0;background:#eff4f5;color:var(--ink);font:16px/1.65 system-ui,sans-serif}
+main{max-width:940px;margin:auto;padding:46px 22px}
+h1,h2,h3,p{margin:0}
+h1{font-size:clamp(30px,6vw,48px);line-height:1.18;margin:8px 0 14px;letter-spacing:-.04em}
+h2{font-size:21px;margin-bottom:12px}
+h3{font-size:16px}
+p{color:var(--muted)}
+.eyebrow{font-size:12px;color:var(--accent);font-weight:750;letter-spacing:.13em}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
+.flow,.controls,.outcomes{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.flow span:nth-child(odd){background:#e5f1ee;color:#164b46;padding:5px 11px;border-radius:6px}
+.controls{margin:14px 0}
+label{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
+button,select{font:inherit;color:inherit;background:#fff;border:1px solid #a1b3be;border-radius:7px;padding:5px 10px}
+button{cursor:pointer}
+button.primary{color:#fff;background:var(--accent);border-color:var(--accent)}
+button:disabled{opacity:.5;cursor:default}
+:focus-visible{outline:3px solid #13867d;outline-offset:3px}
+.outcomes{align-items:stretch;margin-top:14px}
+.outcomes>div{flex:1 1 230px;border:1px solid var(--line);padding:11px 13px;border-radius:9px}
+.good{color:#075b55}
+.bad{color:#a02734}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;text-align:left;font-size:14px;margin-top:14px}
+th,td{border-bottom:1px solid var(--line);padding:9px 7px;white-space:nowrap}
+th{color:var(--muted)}
+footer{color:var(--muted);font-size:13px;margin-top:18px}
+</style>
+</head>
+<body>
+<main>
+<header>
+<p class="eyebrow">FULL-DUPLEX · BARGE-IN</p>
+<h1>AI 正在说，该停下来吗？</h1>
+<p>用四个模拟场景，看分类结果怎样变成继续播报或停播。</p>
+</header>
+<section class="card" aria-labelledby="flow-title">
+<h2 id="flow-title">播报中的信号路径</h2>
+<div class="flow"><span>麦克风</span><span aria-hidden="true">→</span><span>VAD</span><span aria-hidden="true">→</span><span>四分类</span><span aria-hidden="true">→</span><span>停播策略</span><span aria-hidden="true">→</span><span>播放状态</span></div>
+</section>
+<section class="card" aria-labelledby="demo-title">
+<h2 id="demo-title">场景回放</h2>
+<div class="controls">
+<label>场景 <select id="scene">
+<option value="noise">环境噪声</option><option value="backchannel">附和 · 嗯嗯</option>
+<option value="valid">有效发言 · 我想查账单</option><option value="interrupt">明确打断 · 等一下</option>
+</select></label>
+<label>连续有效阈值 <select id="threshold"><option>2</option><option>3</option></select></label>
+</div>
+<p id="scenario"></p>
+<div class="controls">
+<button class="primary" id="play" type="button">自动回放</button>
+<button id="step" type="button">单步推进</button>
+<button id="reset" type="button">重置</button>
+</div>
+<p id="clock" aria-live="polite"></p>
+<div class="outcomes" aria-live="polite">
+<div><h3>仅 VAD · 持续激活 500 ms</h3><p id="baseline"></p></div>
+<div><h3>VAD + 分类 + 停播策略</h3><p id="policy"></p></div>
+</div>
+<div class="table-wrap">
+<table><thead><tr><th scope="col">更新时刻</th><th scope="col">模拟分类</th><th scope="col">连续有效次数</th><th scope="col">策略动作</th></tr></thead><tbody id="timeline"></tbody></table>
+</div>
+</section>
+<footer>示例从 VAD 持续激活且 AI 正在播报开始。分类序列为预设示例，时刻为模拟时间。</footer>
+</main>
+<script>
+const CHUNK_MS = 240;
+const BASELINE_MS = 500;
+const labels = ["0 · 无效", "1 · 附和", "2 · 有效发言", "3 · 明确打断"];
+const scenes = {
+  noise: { expectedStop: false, digits: [2, 0, 2], description: "预期继续播。中间的无效分类会清零，前后两次有效判断无法累加。" },
+  backchannel: { expectedStop: false, digits: [1, 1, 0], description: "预期继续播。用户只是说「嗯嗯」表示在听。" },
+  valid: { expectedStop: true, digits: [2, 2, 2], description: "预期停播。用户开始表达一个新需求。" },
+  interrupt: { expectedStop: true, digits: [3, 2, 2], description: "预期停播。第一个更新点已经识别到「等一下」。" }
+};
+
+const el = Object.fromEntries(
+  ["scene", "threshold", "scenario", "play", "step", "reset", "clock", "baseline", "policy", "timeline"]
+    .map((id) => [id, document.getElementById(id)])
+);
+let position, consecutive, policyStop, baselineStop, timer;
+
+function stopTimer() {
+  clearInterval(timer);
+  timer = null;
+}
+
+function showOutcome(node, stopTime, scene, done) {
+  node.className = "";
+  if (stopTime !== null) {
+    node.textContent = `${stopTime} ms 停播 · ${scene.expectedStop ? "符合预期" : "误打断"}`;
+    node.className = scene.expectedStop ? "good" : "bad";
+  } else if (done) {
+    node.textContent = scene.expectedStop ? "继续播报 · 未触发预期停播" : "继续播报 · 符合预期";
+    node.className = scene.expectedStop ? "bad" : "good";
+  } else {
+    node.textContent = "继续播报";
+  }
+}
+
+function render() {
+  const scene = scenes[el.scene.value];
+  const done = position === scene.digits.length;
+  el.scenario.textContent = scene.description;
+  el.clock.textContent = `${position * CHUNK_MS} ms · 已处理 ${position} / ${scene.digits.length} 块`;
+  el.play.disabled = done;
+  el.step.disabled = done || timer !== null;
+  el.play.textContent = timer === null ? "自动回放" : "暂停回放";
+  showOutcome(el.baseline, baselineStop, scene, done);
+  showOutcome(el.policy, policyStop, scene, done);
+}
+
+function step() {
+  const scene = scenes[el.scene.value];
+  if (position === scene.digits.length) return;
+  const digit = scene.digits[position++];
+  const time = position * CHUNK_MS;
+  if (time >= BASELINE_MS) baselineStop = BASELINE_MS;
+
+  let count = "—";
+  let action = "已停播";
+  if (policyStop === null) {
+    consecutive = digit === 2 ? consecutive + 1 : 0;
+    count = consecutive;
+    if (digit === 3 || consecutive >= Number(el.threshold.value)) {
+      policyStop = time;
+      action = digit === 3 ? "明确打断，停播" : "达到连续确认阈值，停播";
+    } else {
+      action = digit === 2 ? "继续播报，等待确认" : "继续播报，清零";
+    }
+  }
+
+  const row = el.timeline.insertRow();
+  for (const value of [`${time} ms`, labels[digit], count, action]) {
+    row.insertCell().textContent = value;
+  }
+  if (position === scene.digits.length) stopTimer();
+  render();
+}
+
+function reset() {
+  stopTimer();
+  position = 0;
+  consecutive = 0;
+  policyStop = baselineStop = null;
+  el.timeline.replaceChildren();
+  render();
+}
+
+el.play.addEventListener("click", () => {
+  if (timer === null) {
+    timer = setInterval(step, CHUNK_MS);
+  } else {
+    stopTimer();
+  }
+  render();
+});
+el.step.addEventListener("click", step);
+el.reset.addEventListener("click", reset);
+el.scene.addEventListener("change", reset);
+el.threshold.addEventListener("change", reset);
+reset();
+</script>
+</body>
+</html>
