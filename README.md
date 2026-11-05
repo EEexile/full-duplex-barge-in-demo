@@ -2,11 +2,29 @@
 
 AI 播报时遇到插话，要判断是否停下来。AI 听用户说话时，要判断是否该接话。这个浏览器演示把 VAD 之后的两条链路串起来，逐步展示每个判断如何改变对话状态。
 
-[在线体验 Demo](https://eeexile.github.io/full-duplex-barge-in-demo/) · [下载离线 ZIP](https://github.com/EEexile/full-duplex-barge-in-demo/archive/refs/heads/main.zip) · [页面源码](index.html)
+## 演示示例
+
+AI 正在念账单，用户先说「嗯嗯」，AI 继续播报。用户说「等一下」，AI 停下，等用户把问题说完整后再回答。 [听合成语音示例并逐步回放](https://eeexile.github.io/full-duplex-barge-in-demo/)
+
+音频是合成对白。回放程序读取配套分类标签，实际执行停播、等待和接话规则。真实音频推理由外部模型提供。 [示例标签](example.jsonl)
 
 ## 快速开始
 
-打开在线页面，选择「完整对话 · 打断后继续说」，点击「单步推进」。离线使用时，下载并解压 ZIP，双击里面的 `index.html`。同一个文件包含界面和决策逻辑，普通浏览器即可运行。
+使用 Node.js 18 或更新版本运行命令行示例，无需额外依赖。
+
+```bash
+git clone https://github.com/EEexile/full-duplex-barge-in-demo.git
+cd full-duplex-barge-in-demo
+node replay.cjs
+```
+
+命令每行输出一个决策，包含输入类别、前后状态和动作。示例依次输出 `continue`、`stop`、`wait`、`reply`。离线浏览器演示可直接打开仓库中的 `index.html`。
+
+```bash
+node replay.cjs example.jsonl speaking 2
+```
+
+最后两个参数分别是起始状态 `speaking` / `listening`，以及连续有效发言的停播阈值 `2` / `3`。浏览器和命令行共用 `decision.js`。
 
 ## 用自己的分类结果回放
 
