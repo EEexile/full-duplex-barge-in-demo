@@ -5,114 +5,133 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>全双工语音交互决策演示</title>
 <style>
-:root{color-scheme:light;--ink:#172535;--muted:#47586a;--line:#dbe3ea;--accent:#075b55;--paper:#fff}
-*{box-sizing:border-box}
-body{margin:0;background:#eff4f5;color:var(--ink);font:16px/1.65 system-ui,sans-serif}
-main{max-width:1120px;margin:auto;padding:46px 22px}
-h1,h2,h3,p{margin:0}
-h1{font-size:clamp(30px,6vw,48px);line-height:1.18;margin:8px 0 14px;letter-spacing:-.04em}
-h2{font-size:21px;margin-bottom:12px}
-h3{font-size:16px}
-p{color:var(--muted)}
-.eyebrow{font-size:12px;color:var(--accent);font-weight:750;letter-spacing:.13em}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px;margin-top:16px}
-.flow,.controls,.outcomes{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
-.flow span:nth-child(odd){background:#e5f1ee;color:#164b46;padding:5px 11px;border-radius:6px}
-.controls{margin:14px 0}
-label{display:flex;align-items:center;flex-wrap:wrap;gap:6px}
-button,select{font:inherit;color:inherit;background:#fff;border:1px solid #a1b3be;border-radius:7px;padding:5px 10px}
-button{cursor:pointer}
-button.primary{color:#fff;background:var(--accent);border-color:var(--accent)}
-button:disabled{opacity:.5;cursor:default}
-:focus-visible{outline:3px solid #13867d;outline-offset:3px}
-.outcomes{align-items:stretch;margin-top:14px}
-.outcomes>div{flex:1 1 230px;border:1px solid var(--line);padding:11px 13px;border-radius:9px}
-.good{color:#075b55}
-.bad{color:#a02734}
-.table-wrap{overflow-x:auto}
-table{width:100%;border-collapse:collapse;text-align:left;font-size:14px;margin-top:14px}
-th,td{border-bottom:1px solid var(--line);padding:9px 7px;white-space:nowrap}
-th{color:var(--muted)}
-footer{color:var(--muted);font-size:13px;margin-top:18px}
-.branch{flex:1 1 250px;border:1px solid var(--line);border-radius:9px;padding:10px 13px}
-.branch.active{border-color:#52968d;background:#f0f8f6}
-.branch p{font-size:14px}
-.state{color:var(--accent);font-weight:700}
-audio{display:block;width:100%;max-width:570px;margin-top:12px}
-details{border-top:1px solid var(--line);margin-top:16px;padding-top:12px}
-summary{cursor:pointer;font-weight:700}
-details p{margin:8px 0}
-textarea{display:block;width:100%;min-height:125px;padding:10px;border:1px solid #a1b3be;border-radius:7px;font:14px/1.5 monospace;color:var(--ink)}
-[hidden]{display:none !important}
+:root {
+  color-scheme: light;
+  --ink: #1f2328;
+  --muted: #59636e;
+  --line: #d8dee4;
+  --link: #0969da;
+}
+* { box-sizing: border-box; }
+body { margin: 0; color: var(--ink); background: #fff; font: 15px/1.65 system-ui, sans-serif; }
+main { max-width: 920px; margin: auto; padding: 36px 24px 48px; }
+h1, h2, h3, p { margin: 0; }
+h1 { font-size: clamp(26px, 5vw, 36px); line-height: 1.25; }
+h2 { font-size: 19px; margin-bottom: 8px; }
+h3 { font-size: 15px; }
+p, small { color: var(--muted); }
+header { padding-bottom: 19px; border-bottom: 1px solid var(--line); }
+header p { margin-top: 8px; }
+a { color: var(--link); text-underline-offset: 3px; }
+.source { display: inline-block; margin-top: 8px; font-size: 14px; }
+section { margin-top: 22px; }
+audio { display: block; width: min(100%, 490px); margin: 9px 0 6px; }
+.controls, .outcomes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 10px 0; }
+label { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+button, select {
+  max-width: 100%;
+  font: inherit;
+  color: inherit;
+  background: #fff;
+  border: 1px solid #a7b1bc;
+  border-radius: 4px;
+  padding: 4px 9px;
+}
+button { cursor: pointer; }
+button.primary { background: #eaf3ff; border-color: #78a4d7; color: #084a98; font-weight: 650; }
+button:disabled { opacity: .55; cursor: default; }
+:focus-visible { outline: 2px solid var(--link); outline-offset: 3px; }
+.outcomes { align-items: flex-start; padding: 9px 0; border-bottom: 1px solid var(--line); }
+.outcomes > div { flex: 1 1 230px; }
+.good { color: #1b6330; }
+.bad { color: #a02734; }
+.state { color: var(--ink); font-weight: 650; }
+.replay-status { display: flex; flex-wrap: wrap; align-items: baseline; gap: 3px 14px; margin-top: 10px; }
+#clock { font-size: 13px; font-variant-numeric: tabular-nums; }
+.table-wrap { overflow-x: auto; margin-top: 9px; }
+table { width: 100%; border-collapse: collapse; text-align: left; font-size: 14px; }
+th, td { padding: 7px 9px; border-bottom: 1px solid var(--line); }
+th { color: var(--muted); background: #f6f8fa; font-weight: 650; white-space: nowrap; }
+td { overflow-wrap: anywhere; }
+td:last-child { min-width: 146px; }
+.tech { display: none; }
+#replay:has(#technical:checked) .tech { display: table-cell; }
+#replay:has(#technical:checked) .table-wrap table { min-width: 690px; }
+#empty-log { padding: 8px 9px; border-bottom: 1px solid var(--line); font-size: 14px; }
+details { margin-top: 14px; }
+summary { cursor: pointer; color: #404953; }
+details p { margin: 6px 0; }
+textarea {
+  display: block; width: 100%; min-height: 112px; padding: 8px;
+  border: 1px solid #a7b1bc; border-radius: 4px; font: 14px/1.5 monospace; color: var(--ink);
+}
+[hidden] { display: none !important; }
+@media (max-width: 540px) {
+  main { padding: 22px 14px 36px; }
+  th, td { padding: 6px; }
+  td:last-child { min-width: 100px; }
+}
 </style>
 </head>
 <body>
 <main>
 <header>
-<p class="eyebrow">FULL-DUPLEX · TURN CONTROL</p>
-<h1>AI 什么时候停？什么时候接话？</h1>
-<p>同一条麦克风输入，VAD 通过后根据 AI 的播放状态走不同的判断链路。</p>
+<h1>全双工语音交互演示</h1>
+<p>电话里，用户说「嗯嗯」时继续播，听到「等一下」就停。等问题说完整了，再接话。</p>
+<a class="source" href="https://github.com/EEexile/full-duplex-barge-in-demo">GitHub 仓库</a>
 </header>
 
-<section class="card" aria-labelledby="audio-title">
-<h2 id="audio-title">听一遍完整对话</h2>
-<p>AI 在念账单。用户说「嗯嗯」时播报继续，听到「等一下」时停下。用户补完问题后，AI 再接话。</p>
-<audio controls preload="metadata" src="demo.m4a" aria-label="合成语音对话示例"></audio>
+<section aria-labelledby="audio-title">
+<h2 id="audio-title">试听账单对话</h2>
+<audio controls preload="metadata" src="demo.m4a" aria-label="账单对话录音"></audio>
+<small>这段对话由语音合成。下方用配套标签回放，时间按 240 ms 分块显示。</small>
 </section>
 
-<section class="card" aria-labelledby="flow-title">
-<h2 id="flow-title">VAD 之后的两条链路</h2>
-<div class="flow">
-<span>麦克风音频</span><span aria-hidden="true">→</span><span>VAD</span><span aria-hidden="true">→</span><span>按 AI 状态分流</span>
-</div>
-<div class="outcomes">
-<div class="branch" id="speaking-branch">
-<h3>AI 讲 · 播报中</h3>
-<p>8k 电话信道流式打断四分类 → 继续播报或停播</p>
-</div>
-<div class="branch" id="listening-branch">
-<h3>AI 听 · 等用户说完</h3>
-<p>有效性二分类 → 有效才进入 TurnSense → 等待或接话</p>
-</div>
-</div>
-</section>
-
-<section class="card" aria-labelledby="demo-title">
+<section id="replay" aria-labelledby="demo-title">
 <h2 id="demo-title">场景回放</h2>
 <div class="controls">
 <label>场景 <select id="scene">
-<option value="dialogue">完整对话 · 打断后继续说</option>
-<option value="noise">AI 讲 · 环境噪声</option>
-<option value="speech">AI 讲 · 普通发言连续确认</option>
-<option value="filter">AI 听 · VAD 过滤与无效过滤</option>
-<option value="backchannel">AI 听 · 附和通过有效性判断</option>
+<option value="dialogue">完整对话</option>
+<option value="noise">播报时有噪声</option>
+<option value="speech">播报时用户继续说</option>
+<option value="filter">监听时过滤噪声</option>
+<option value="backchannel">监听时听到「嗯嗯」</option>
 <option value="custom" id="custom-option" disabled>自定义场景</option>
 </select></label>
-<label>停播所需连续有效次数 <select id="threshold"><option>2</option><option>3</option></select></label>
+<label>连续有效几次停播 <select id="threshold"><option>2</option><option>3</option></select></label>
 </div>
 <p id="scenario"></p>
 <div class="controls">
-<button class="primary" id="play" type="button">自动回放</button>
-<button id="step" type="button">单步推进</button>
+<button class="primary" id="step" type="button">单步推进</button>
+<button id="play" type="button">自动回放</button>
 <button id="reset" type="button">重置</button>
+<label><input id="technical" type="checkbox"> 显示 VAD 和分类</label>
 </div>
-<p id="clock"></p>
+<div class="replay-status">
 <p class="state" id="status" role="status"></p>
+<p id="clock"></p>
+</div>
 <div class="outcomes" id="comparison" hidden aria-live="polite">
-<div><h3>仅 VAD · 持续激活 500 ms</h3><p id="baseline"></p></div>
-<div><h3>VAD + 分类 + 停播策略</h3><p id="policy"></p></div>
+<div><h3>VAD 连续激活 500 ms</h3><p id="baseline"></p></div>
+<div><h3>加入四分类和停播规则</h3><p id="policy"></p></div>
 </div>
 <div class="table-wrap" tabindex="0" aria-label="逐步决策记录">
 <table>
-<thead><tr><th scope="col">时刻</th><th scope="col">输入示例</th><th scope="col">分流前状态</th><th scope="col">VAD</th><th scope="col">模拟四分类</th><th scope="col">听 · 二分类</th><th scope="col">模拟 TurnSense</th><th scope="col">动作</th></tr></thead>
+<thead><tr><th scope="col" class="tech">时刻</th><th scope="col">收到的声音</th><th scope="col">当时状态</th><th scope="col" class="tech">VAD</th><th scope="col" class="tech">四分类</th><th scope="col" class="tech">二分类</th><th scope="col" class="tech">TurnSense</th><th scope="col">动作</th></tr></thead>
 <tbody id="timeline"></tbody>
 </table>
 </div>
+<p id="empty-log">点一次「单步推进」，看这一块声音触发了什么动作。</p>
+
+<details>
+<summary>决策规则</summary>
+<p>VAD 通过后，系统按 AI 当前状态处理。播报时用 8k 电话信道四分类判断是否停播。监听时先过滤无效输入，剩下的交给 TurnSense 判断这句话是否说完整。</p>
+</details>
 <details>
 <summary>用自己的分类结果试跑</summary>
-<p id="input-help">每行是一条 JSON 数组，依次填输入说明、四分类编号、可选的 TurnSense 结果。<code>null</code> 表示 VAD 未激活。只要模型能导出这些结果，就可以回放。</p>
+<p id="input-help">每行填一个 JSON 数组，依次写输入说明、四分类编号和可选的 TurnSense 结果。<code>null</code> 表示 VAD 未激活。</p>
 <form id="custom-form">
-<div class="controls"><label>起始状态 <select id="initial-mode"><option value="speaking">AI 讲</option><option value="listening">AI 听</option></select></label></div>
+<div class="controls"><label>起始状态 <select id="initial-mode"><option value="speaking">AI 播报</option><option value="listening">AI 监听</option></select></label></div>
 <label for="custom-input">分类结果（每行一块）</label>
 <textarea id="custom-input" aria-describedby="input-help" spellcheck="false" required>["嗯嗯", 1]
 ["等一下", 3]
@@ -122,7 +141,6 @@ textarea{display:block;width:100%;min-height:125px;padding:10px;border:1px solid
 </form>
 </details>
 </section>
-<footer>每步 240 ms 为演示时钟。页面对示例或导入的分类结果执行分流和交互规则。</footer>
 </main>
 
 <script src="decision.js"></script>
@@ -136,7 +154,7 @@ const turnLabels = { complete: "完整", incomplete: "未完整", invalid: "无�
 const scenes = {
   dialogue: {
     initial: "speaking",
-    description: "先看「嗯嗯」怎么继续播，再看「等一下」怎么停播，最后等用户把话说完。",
+    description: "",
     events: [
       ["嗯嗯", BACKCHANNEL],
       ["等一下", INTERRUPT],
@@ -147,12 +165,12 @@ const scenes = {
   },
   noise: {
     initial: "speaking",
-    description: "VAD 一直激活。噪声在第 1、3 块被误判为有效，中间的无效会清零。",
+    description: "三块噪声都通过 VAD。第 1、3 块被误判为有效，中间一块把计数清零。",
     events: [["环境噪声", VALID], ["环境噪声", INVALID], ["环境噪声", VALID]]
   },
   speech: {
     initial: "speaking",
-    description: "三块都识别到有效发言。切换 2 次或 3 次阈值，对比停播时刻。",
+    description: "连续三块都是发言。把停播阈值从 2 改成 3，可以比较停播时刻。",
     events: [
       ["我想", VALID],
       ["再查一下", VALID],
@@ -161,7 +179,7 @@ const scenes = {
   },
   filter: {
     initial: "listening",
-    description: "静音在 VAD 处被拦下。通过 VAD 的噪声也可在有效性过滤处被拦下。",
+    description: "VAD 拦住静音。通过 VAD 的那块噪声会被判为无效。",
     events: [
       ["静音", null],
       ["被 VAD 激活的噪声", INVALID],
@@ -170,7 +188,7 @@ const scenes = {
   },
   backchannel: {
     initial: "listening",
-    description: "附和、明确打断都映射为有效。是否值得接话，由 TurnSense 继续判断。",
+    description: "「嗯嗯」通过有效性过滤，TurnSense 判为无效表达，AI 继续听。",
     events: [
       ["嗯嗯", BACKCHANNEL, "invalid"],
       ["等一下，我还有个……", INTERRUPT, "incomplete"],
@@ -181,7 +199,7 @@ const scenes = {
 
 const el = Object.fromEntries(
   ["scene", "threshold", "scenario", "play", "step", "reset", "clock", "status",
-    "comparison", "baseline", "policy", "timeline", "speaking-branch", "listening-branch",
+    "comparison", "baseline", "policy", "timeline", "empty-log",
     "custom-option", "custom-form", "initial-mode", "custom-input", "custom-error"]
     .map((id) => [id, document.getElementById(id)])
 );
@@ -197,10 +215,10 @@ function describe(result) {
     vad_inactive: "VAD 未激活，维持状态",
     continue: controller.consecutive
       ? `继续播报 · 有效 ${controller.consecutive}/${controller.threshold}`
-      : "继续播报 · 计数清零",
-    stop: `${result.reason === "explicit" ? "明确打断" : `连续 ${controller.threshold} 次有效`}，停播并转为 AI 听`,
+      : "继续播报",
+    stop: `${result.reason === "explicit" ? "明确打断" : `连续 ${controller.threshold} 次有效`}，停播`,
     ignore_audio: "忽略输入，继续听",
-    reply: "开始回复，转为 AI 讲",
+    reply: "开始回复",
     ignore_turn: "忽略无效表达，继续听",
     wait: result.turn ? "继续等用户说完" : "缺少 TurnSense 结果，继续听",
   };
@@ -209,7 +227,7 @@ function describe(result) {
 }
 
 function modeName(current) {
-  return current === "speaking" ? "AI 讲" : "AI 听";
+  return current === "speaking" ? "AI 播报" : "AI 监听";
 }
 
 function render() {
@@ -217,11 +235,10 @@ function render() {
   const time = position * CHUNK_MS;
   const done = position === scene.events.length;
   el.scenario.textContent = scene.description;
-  el.clock.textContent = `${time} ms · 已处理 ${position} / ${scene.events.length} 块`;
-  el.status.textContent = `当前状态 · ${modeName(controller.mode)}${lastAction ? "  /  " + lastAction : ""}`;
-  for (const branch of ["speaking", "listening"]) {
-    el[branch + "-branch"].classList.toggle("active", branch === controller.mode);
-  }
+  el.scenario.hidden = !scene.description;
+  el.clock.textContent = `${position} / ${scene.events.length} 块，${time} ms`;
+  el.status.textContent = `当前状态：${modeName(controller.mode)}${lastAction ? " · " + lastAction : ""}`;
+  el["empty-log"].hidden = position !== 0;
   el.play.disabled = done;
   el.step.disabled = done || timer !== null;
   el.play.textContent = timer === null ? "自动回放" : "暂停回放";
@@ -246,9 +263,12 @@ function step() {
 
   const row = el.timeline.insertRow();
   const active = digit !== null;
-  for (const value of [`${time} ms`, sample, before, active ? "通过" : "未激活",
-    active ? labels[digit] : "—", binary, turnLabel, action]) {
-    row.insertCell().textContent = value;
+  const values = [`${time} ms`, sample, before, active ? "通过" : "未激活",
+    active ? labels[digit] : "—", binary, turnLabel, action];
+  for (const [index, value] of values.entries()) {
+    const cell = row.insertCell();
+    cell.textContent = value;
+    if (index === 0 || (index >= 3 && index <= 6)) cell.className = "tech";
   }
   if (position === scene.events.length) stopTimer();
   render();
@@ -289,7 +309,7 @@ el["custom-form"].addEventListener("submit", (event) => {
   }
   scenes.custom = {
     initial: el["initial-mode"].value,
-    description: "已载入你提供的分类结果。点击单步推进或自动回放查看动作。",
+    description: "已载入。点「单步推进」查看每块的动作。",
     events
   };
   el["custom-option"].disabled = false;
