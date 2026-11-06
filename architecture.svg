@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="880" height="450" viewBox="0 0 880 450" role="img" aria-labelledby="title desc">
+  <title id="title">全双工语音交互决策</title>
+  <desc id="desc">电话音频通过 VAD 后，按 AI 当前状态分流。播报时用流式四分类决定是否停播。监听时先判断声音是否有效，有效则由 TurnSense 判断用户有没有说完。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0 0 8 4 0 8Z" fill="#63768b"/>
+    </marker>
+  </defs>
+  <style>
+    text { font-family: system-ui, "PingFang SC", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif; fill: #203046; }
+    .heading { font-size: 20px; font-weight: 700; }
+    .label { font-size: 17px; font-weight: 600; }
+    .body { font-size: 17px; }
+    .small { font-size: 14px; fill: #52647a; }
+    .center { text-anchor: middle; }
+    .line { fill: none; stroke: #63768b; stroke-width: 1.65; }
+    .flow { marker-end: url(#arrow); }
+  </style>
+  <rect x="1" y="1" width="878" height="448" rx="15" fill="#fff" stroke="#d9e2ec"/>
+
+  <rect x="226" y="20" width="160" height="43" rx="8" fill="#f0f4f8"/>
+  <text x="306" y="48" class="label center">电话音频</text>
+  <path d="M386 42H409" class="line flow"/>
+  <rect x="412" y="20" width="78" height="43" rx="8" fill="#f0f4f8"/>
+  <text x="451" y="48" class="label center">VAD</text>
+  <path d="M490 42H514" class="line flow"/>
+  <rect x="517" y="20" width="137" height="43" rx="8" fill="#f0f4f8"/>
+  <text x="585.5" y="48" class="label center">AI 当前状态</text>
+
+  <path d="M586 63V88H232V116" class="line flow"/>
+  <path d="M586 88H664V116" class="line flow"/>
+
+  <rect x="24" y="120" width="416" height="304" rx="12" fill="#edf5ff" stroke="#b5cfec"/>
+  <text x="44" y="152" class="small">AI 正在播报</text>
+  <text x="44" y="183" class="heading">8 kHz 流式打断四分类</text>
+  <line x1="44" x2="420" y1="201" y2="201" stroke="#b5cfec"/>
+  <text x="46" y="225" class="small">分类结果</text>
+  <text x="205" y="225" class="small">播报动作</text>
+  <g class="body">
+    <text x="46" y="262">无效</text><text x="205" y="262">继续播报</text>
+    <text x="46" y="303">附和</text><text x="205" y="303">继续播报</text>
+    <text x="46" y="344">有效发言</text><text x="205" y="344">连续确认后停播</text>
+    <text x="46" y="385">明确打断</text><text x="205" y="385">识别后停播</text>
+  </g>
+  <path d="M44 274H420M44 315H420M44 356H420" stroke="#d2e2f4"/>
+
+  <rect x="472" y="120" width="384" height="304" rx="12" fill="#eff8f4" stroke="#b9dacb"/>
+  <text x="492" y="152" class="small">AI 正在监听</text>
+  <rect x="538" y="168" width="252" height="39" rx="7" fill="#fff" stroke="#b9dacb"/>
+  <text x="664" y="194" class="label center">声音有效吗？</text>
+  <path d="M664 207V225H544V255" class="line flow"/>
+  <path d="M664 225H731V255" class="line flow"/>
+  <text x="553" y="245" class="small">无效</text>
+  <text x="740" y="245" class="small">有效</text>
+  <rect x="496" y="259" width="96" height="50" rx="7" fill="#fff" stroke="#b9dacb"/>
+  <text x="544" y="290" class="body center">忽略</text>
+  <rect x="625" y="259" width="212" height="50" rx="7" fill="#fff" stroke="#b9dacb"/>
+  <text x="731" y="281" class="label center">TurnSense</text>
+  <text x="731" y="300" class="small center">判断有没有说完</text>
+  <path d="M731 309V332H645V357" class="line flow"/>
+  <path d="M731 332H786V357" class="line flow"/>
+  <rect x="583" y="361" width="124" height="44" rx="7" fill="#fff" stroke="#b9dacb"/>
+  <rect x="724" y="361" width="124" height="44" rx="7" fill="#fff" stroke="#b9dacb"/>
+  <text x="645" y="388" class="small center">说完 · 回复</text>
+  <text x="786" y="388" class="small center">没说完 · 继续听</text>
+</svg>
