@@ -9,7 +9,9 @@ AI 播报时遇到插话，要判断是否停下来。AI 听用户说话时，�
 - A：用户说「对对对」，AI 等一拍，再接着讲原来的安排。
 - B：用户说「等一下，我打断一下」，两人短暂重叠。AI 停播，等用户说完再接话。
 
-AI 用合成语音，用户声音来自公开的 [AliMeeting](https://www.openslr.org/119/)（[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)）。音频用于场景回放，切换时刻预先编排。页面下方也可以用 [示例标签](example.jsonl) 逐块查看交互规则。
+两段对话为预录回放。页面下方可用 [示例标签](example.jsonl) 逐块查看交互规则。
+
+音频来源：[AliMeeting](https://www.openslr.org/119/) 的 R8002_M8002、R8009_M8022，截取并调整音量后与合成语音混音。改编音频采用 [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)。
 
 ## 快速开始
 
