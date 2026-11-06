@@ -1,10 +1,14 @@
 # 流式打断四分类
 
-AI 正在播报时，判断该接着说，还是停下来听用户。
+接通预约助手，在 AI 说话时试试「对对对」或「等一下」。
+
+[开始通话](https://eeexile.github.io/full-duplex-barge-in-demo/) · [试听样例](https://eeexile.github.io/full-duplex-barge-in-demo/navigation.html)
+
+互动通话使用浏览器语音识别、规则判定和合成播报。
 
 ## 系统架构
 
-<img width="880" height="450" alt="全双工语音交互架构" src="https://github.com/user-attachments/assets/6e87954a-e42c-4f97-8f1a-1d58dbc4d643" />
+![全双工语音交互架构](architecture.svg)
 
 | 分类 | 听到的声音 | 播报怎么处理 |
 | --- | --- | --- |
@@ -13,8 +17,6 @@ AI 正在播报时，判断该接着说，还是停下来听用户。
 | 2 · 有效发言 | 「我想再查一下……」 | 连续判为有效后停播 |
 | 3 · 明确打断 | 「等一下，我打断一下」 | 识别后停播，让用户说 |
 
-[打开交互 Demo](https://eeexile.github.io/full-duplex-barge-in-demo/)
-
-用户录音来自 [AliMeeting](https://www.openslr.org/119/) 的 R8002_M8002、R8009_M8022。
+试听样例中的用户录音来自 [AliMeeting](https://www.openslr.org/119/) 的 R8002_M8002、R8009_M8022。
 
 本地试跑：克隆仓库后，运行 `node replay.cjs`。
