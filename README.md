@@ -4,9 +4,12 @@ AI 播报时遇到插话，要判断是否停下来。AI 听用户说话时，�
 
 ## 演示示例
 
-[打开在线演示](https://eeexile.github.io/full-duplex-barge-in-demo/)。点「播放示例」：AI 用合成语音讲会议安排，真人说「对对对」时继续播；随后另一段真人发言进入，连续两块判为有效，AI 停播，真人录音继续播放。
+[打开在线演示](https://eeexile.github.io/full-duplex-barge-in-demo/)。在「同一段播报，两种处理」中，分别播放 A、B，也可以展开各自的波形。
 
-AI 音轨用 macOS 中文语音合成，用户音轨剪自公开的 [AliMeeting](https://www.openslr.org/119/) [试听片段](https://soul-ailab.github.io/soulx-transcriber/#demos)（[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)）。浏览器按预标结果执行停播规则。下方的账单文字示例继续演示「等一下」直接停播，以及如何判断用户说完。 [示例标签](example.jsonl)
+- A：用户说「对对对」，AI 等一拍，再接着讲原来的安排。
+- B：用户说「等一下，我打断一下」，两人短暂重叠。AI 停播，等用户说完再接话。
+
+AI 用合成语音，用户声音来自公开的 [AliMeeting](https://www.openslr.org/119/)（[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)）。音频用于场景回放，切换时刻预先编排。页面下方也可以用 [示例标签](example.jsonl) 逐块查看交互规则。
 
 ## 快速开始
 
