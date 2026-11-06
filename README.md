@@ -4,9 +4,9 @@ AI 播报时遇到插话，要判断是否停下来。AI 听用户说话时，�
 
 ## 演示示例
 
-AI 正在念账单，用户先说「嗯嗯」，AI 继续播报。用户说「等一下」，AI 停下，等用户把问题说完整后再回答。 [听合成语音示例并逐步回放](https://eeexile.github.io/full-duplex-barge-in-demo/)
+[打开在线演示](https://eeexile.github.io/full-duplex-barge-in-demo/)。点「播放示例」：AI 用合成语音讲会议安排，真人说「对对对」时继续播；随后另一段真人发言进入，连续两块判为有效，AI 停播，真人录音继续播放。
 
-音频是合成对白。回放程序读取配套分类标签，实际执行停播、等待和接话规则。真实音频推理由外部模型提供。 [示例标签](example.jsonl)
+AI 音轨用 macOS 中文语音合成，用户音轨剪自公开的 [AliMeeting](https://www.openslr.org/119/) [试听片段](https://soul-ailab.github.io/soulx-transcriber/#demos)（[CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/)）。浏览器按预标结果执行停播规则。下方的账单文字示例继续演示「等一下」直接停播，以及如何判断用户说完。 [示例标签](example.jsonl)
 
 ## 快速开始
 
@@ -78,7 +78,7 @@ flowchart TD
 
 ## 试一遍
 
-1. 选择「完整对话」，点击「单步推进」。勾选「显示 VAD 和分类」可以查看每块的技术细节。
+1. 选择「账单对话（文字示例）」，点击「单步推进」。勾选「显示 VAD 和分类」可以查看每块的技术细节。
 2. AI 正在播报时听到「嗯嗯」，继续播。听到「等一下」，触发停播并转入监听。
 3. 用户说「我想查一下……」，通过有效性判断，但 TurnSense 判为未完整，AI 继续等。
 4. 用户补完「上个月的账单」，TurnSense 判为完整，AI 开始回复并回到播报状态。

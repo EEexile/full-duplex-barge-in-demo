@@ -80,9 +80,23 @@ textarea {
 <main>
 <header>
 <h1>全双工语音交互演示</h1>
-<p>电话里，用户说「嗯嗯」时继续播，听到「等一下」就停。等问题说完整了，再接话。</p>
+<p>AI 播报时，听到附和就继续；听到用户要发言就停下来。用户说完之后，AI 再接话。</p>
 <a class="source" href="https://github.com/EEexile/full-duplex-barge-in-demo">GitHub 仓库</a>
 </header>
+
+<section aria-labelledby="audio-title">
+<h2 id="audio-title">试听：AI 播报遇到真人插话</h2>
+<p>AI 用合成语音讲会议安排。先听到真人附和「对对对」，继续讲；随后有人开口发言，连续两块判为有效后停播。</p>
+<div class="controls">
+<button class="primary" id="audio-play" type="button">播放示例</button>
+<button id="audio-reset" type="button">从头开始</button>
+</div>
+<p class="state" id="audio-status" role="status">等待播放</p>
+<ol id="audio-log" aria-label="试听中的交互记录"></ol>
+<audio id="voice-ai" preload="auto" src="scene-ai.m4a" hidden></audio>
+<audio id="voice-user" preload="auto" src="scene-user.m4a" hidden></audio>
+<small>用户侧剪自下方两段 AliMeeting 真人录音。回放使用预标结果控制播报，可直接听到停播。</small>
+</section>
 
 <section aria-labelledby="real-title">
 <h2 id="real-title">真人会议录音</h2>
@@ -102,17 +116,11 @@ textarea {
 <a href="https://www.openslr.org/119/">AliMeeting</a> · <a href="https://soul-ailab.github.io/soulx-transcriber/#demos">原始预览</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></small>
 </section>
 
-<section aria-labelledby="audio-title">
-<h2 id="audio-title">试听账单对话</h2>
-<audio controls preload="metadata" src="demo.m4a" aria-label="账单对话录音"></audio>
-<small>这段对话由语音合成。下方用配套标签回放，时间按 240 ms 分块显示。</small>
-</section>
-
 <section id="replay" aria-labelledby="demo-title">
-<h2 id="demo-title">场景回放</h2>
+<h2 id="demo-title">逐块看决策</h2>
 <div class="controls">
 <label>场景 <select id="scene">
-<option value="dialogue">完整对话</option>
+<option value="dialogue">账单对话（文字示例）</option>
 <option value="noise">播报时有噪声</option>
 <option value="speech">播报时用户继续说</option>
 <option value="filter">监听时过滤噪声</option>
@@ -165,6 +173,7 @@ textarea {
 </main>
 
 <script src="decision.js"></script>
+<script src="scene-audio.js" defer></script>
 <script>
 const { CHUNK_MS, INVALID, BACKCHANNEL, VALID, INTERRUPT, parseEvents, TurnController } = DuplexDecision;
 const VAD_BASELINE_MS = 500;
