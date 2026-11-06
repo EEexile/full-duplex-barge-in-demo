@@ -26,9 +26,6 @@ a { color: var(--link); text-underline-offset: 3px; }
 .source { display: inline-block; margin-top: 8px; font-size: 14px; }
 section { margin-top: 22px; }
 audio { display: block; width: min(100%, 490px); margin: 9px 0 6px; }
-.recordings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px 20px; }
-.recordings p { font-size: 14px; }
-.recording-credit { display: block; margin-top: 8px; }
 .controls, .outcomes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 10px 0; }
 label { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 button, select {
@@ -99,7 +96,7 @@ textarea {
 <main>
 <header>
 <h1>全双工语音交互演示</h1>
-<p>AI 播报时，听到附和就继续；听到用户要发言就停下来。用户说完之后，AI 再接话。</p>
+<p>AI 播报时，听到附和会停一拍再继续。遇到明确打断，就停播让用户说完，再接话。</p>
 <a class="source" href="https://github.com/EEexile/full-duplex-barge-in-demo">GitHub 仓库</a>
 </header>
 
@@ -145,24 +142,6 @@ textarea {
     </article>
   </div>
   <small>场景回放，播放节点预先编排。用户为 AliMeeting 真人近讲，AI 为合成播报。两段真人原声分别来自 R8002_M8002 和 R8009_M8022，经过截取、音量调整及混音。<a href="https://www.openslr.org/119/">AliMeeting</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">音频改编 CC BY-SA 4.0</a></small>
-</section>
-
-<section aria-labelledby="real-title">
-<h2 id="real-title">真人会议录音</h2>
-<div class="recordings">
-<div>
-<h3>两个人同时说话</h3>
-<audio controls preload="none" src="alimeeting-overlap.m4a" aria-label="真人会议：两个人同时说话"></audio>
-<p>约第 3 秒，两个人的话叠在一起。</p>
-</div>
-<div>
-<h3>说话时听到附和</h3>
-<audio controls preload="none" src="alimeeting-backchannel.m4a" aria-label="真人会议：说话时听到附和"></audio>
-<p>约第 2 秒，有人说「对对对」，原说话人继续讲。</p>
-</div>
-</div>
-<small class="recording-credit">这两段用于试听。录音来自 Alibaba Group 发布的 AliMeeting 测试集，从 Soul AI Lab 的公开视频中提取音轨、截取并转为 AAC。
-<a href="https://www.openslr.org/119/">AliMeeting</a> · <a href="https://soul-ailab.github.io/soulx-transcriber/#demos">原始预览</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></small>
 </section>
 
 <section id="replay" aria-labelledby="demo-title">
