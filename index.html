@@ -69,6 +69,45 @@ textarea {
   border: 1px solid #a7b1bc; border-radius: 4px; font: 14px/1.5 monospace; color: var(--ink);
 }
 [hidden] { display: none !important; }
+.audio-demo {
+  padding: clamp(16px, 4vw, 30px); border: 1px solid #cfdbe3; border-radius: 14px;
+  background: #f6fafb;
+}
+.audio-demo h2 { margin-bottom: 4px; font-size: clamp(20px, 4vw, 26px); }
+#audio-play { padding: 8px 16px; background: #174565; color: white; border-color: #174565; }
+#audio-time { margin-left: auto; font-size: 14px; font-variant-numeric: tabular-nums; }
+.audio-timeline { --played: 0%; --cut: 66%; margin: 14px 0; }
+.audio-track { margin: 10px 0; }
+.audio-track header { display: flex; justify-content: space-between; gap: 8px; padding: 0 0 4px; border: 0; }
+.audio-track header span { font-size: 13px; color: var(--muted); }
+.audio-track[data-active] header span { font-weight: 700; color: #174565; }
+.wave {
+  position: relative; height: 47px; border-radius: 6px; overflow: hidden;
+  background: #e5edf2; color: #21739b;
+}
+.audio-track-user .wave { background: #e1eeeb; color: #087858; }
+.wave svg { display: block; width: 100%; height: 100%; }
+.wave-remaining { opacity: .32; }
+.wave-played {
+  position: absolute; inset: 0;
+  clip-path: inset(0 calc(100% - var(--track-played, var(--played))) 0 0);
+}
+.wave-cursor, .wave-cut { position: absolute; top: 0; bottom: 0; width: 2px; }
+.wave-cursor { left: var(--track-played, var(--played)); background: #163b54; }
+.wave-cut { left: var(--cut); background: #a53524; }
+.wave-cut::after {
+  content: "停播"; position: absolute; top: 3px; left: 5px; padding: 0 5px; border-radius: 3px;
+  background: #a53524; color: white; font-size: 12px; white-space: nowrap;
+}
+.audio-axis { display: flex; justify-content: space-between; color: var(--muted); font-size: 12px; }
+.audio-cues { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; list-style: none; margin: 14px 0 10px; padding: 0; }
+.audio-cues li { padding: 8px 9px; border: 1px solid #d4e0e7; border-radius: 7px; background: white; }
+.audio-cues li[aria-current="step"] { border-color: #21739b; background: #e7f2f8; }
+.audio-cues li[data-stop][aria-current="step"] { border-color: #b35b4b; background: #fff0ec; }
+.audio-cues strong, .audio-cues span { display: block; }
+.audio-cues span { color: var(--muted); font-size: 12px; }
+.audio-demo details { font-size: 14px; }
+.audio-demo ol:not(.audio-cues) { padding-left: 22px; }
 @media (max-width: 540px) {
   main { padding: 22px 14px 36px; }
   th, td { padding: 6px; }
@@ -84,18 +123,54 @@ textarea {
 <a class="source" href="https://github.com/EEexile/full-duplex-barge-in-demo">GitHub 仓库</a>
 </header>
 
-<section aria-labelledby="audio-title">
-<h2 id="audio-title">试听：AI 播报遇到真人插话</h2>
-<p>AI 用合成语音讲会议安排。先听到真人附和「对对对」，继续讲；随后有人开口发言，连续两块判为有效后停播。</p>
+<section class="audio-demo" aria-labelledby="audio-title">
+<h2 id="audio-title">AI 在说，什么时候该停？</h2>
+<p>听一段会议场景。看「对对对」和接下来的正式发言，怎样触发不同的动作。</p>
 <div class="controls">
 <button class="primary" id="audio-play" type="button">播放示例</button>
 <button id="audio-reset" type="button">从头开始</button>
+<output id="audio-time" aria-label="播放进度" aria-live="off">0.0 / 8.0 秒</output>
 </div>
+<div class="audio-timeline" id="audio-timeline">
+  <div class="audio-track" id="audio-track-ai">
+    <header><strong>AI 播报</strong><span id="audio-state-ai">合成语音</span></header>
+    <div class="wave" aria-hidden="true">
+      <svg viewBox="0 0 160 40" preserveAspectRatio="none">
+        <defs><path id="wave-ai" d="M0 7h.7v26h-.7z M1 4.5h.7v31h-.7z M2 5h.7v30h-.7z M3 10.5h.7v19h-.7z M4 14.5h.7v11h-.7z M5 7h.7v26h-.7z M6 6h.7v28h-.7z M7 8h.7v24h-.7z M8 9h.7v22h-.7z M9 15h.7v10h-.7z M10 7h.7v26h-.7z M11 6.5h.7v27h-.7z M12 6h.7v28h-.7z M13 9.5h.7v21h-.7z M14 5.5h.7v29h-.7z M15 4.5h.7v31h-.7z M16 5h.7v30h-.7z M17 9.5h.7v21h-.7z M18 11.5h.7v17h-.7z M19 9h.7v22h-.7z M20 7h.7v26h-.7z M21 5.5h.7v29h-.7z M22 9h.7v22h-.7z M23 11h.7v18h-.7z M24 3h.7v34h-.7z M25 3.5h.7v33h-.7z M26 3.5h.7v33h-.7z M27 8.5h.7v23h-.7z M28 10.5h.7v19h-.7z M29 9h.7v22h-.7z M30 8.5h.7v23h-.7z M31 11.5h.7v17h-.7z M32 8.5h.7v23h-.7z M33 3h.7v34h-.7z M34 3h.7v34h-.7z M35 4.5h.7v31h-.7z M36 6.5h.7v27h-.7z M37 18.5h.7v3h-.7z M42 17.5h.7v5h-.7z M43 6.5h.7v27h-.7z M44 6.5h.7v27h-.7z M45 7.5h.7v25h-.7z M46 15.5h.7v9h-.7z M47 17.5h.7v5h-.7z M48 9h.7v22h-.7z M49 7h.7v26h-.7z M50 8h.7v24h-.7z M51 16.5h.7v7h-.7z M52 7h.7v26h-.7z M53 7h.7v26h-.7z M54 8h.7v24h-.7z M55 9h.7v22h-.7z M56 8h.7v24h-.7z M57 7.5h.7v25h-.7z M58 13h.7v14h-.7z M59 10.5h.7v19h-.7z M60 8.5h.7v23h-.7z M61 8.5h.7v23h-.7z M62 7h.7v26h-.7z M63 3h.7v34h-.7z M64 3h.7v34h-.7z M65 5h.7v30h-.7z M66 9h.7v22h-.7z M67 14h.7v12h-.7z M68 13h.7v14h-.7z M69 6h.7v28h-.7z M70 5.5h.7v29h-.7z M71 9h.7v22h-.7z M72 6.5h.7v27h-.7z M73 7.5h.7v25h-.7z M74 7.5h.7v25h-.7z M75 9h.7v22h-.7z M76 12.5h.7v15h-.7z M77 9h.7v22h-.7z M78 6h.7v28h-.7z M79 7.5h.7v25h-.7z M80 10h.7v20h-.7z M81 14h.7v12h-.7z M82 5h.7v30h-.7z M83 4.5h.7v31h-.7z M84 8h.7v24h-.7z M85 7.5h.7v25h-.7z M86 6.5h.7v27h-.7z M87 8.5h.7v23h-.7z M88 9.5h.7v21h-.7z M89 14h.7v12h-.7z M90 13.5h.7v13h-.7z M91 11.5h.7v17h-.7z M92 10.5h.7v19h-.7z M93 10.5h.7v19h-.7z M94 11.5h.7v17h-.7z M95 16h.7v8h-.7z M99 18.5h.7v3h-.7z M100 13h.7v14h-.7z M101 11h.7v18h-.7z M102 5h.7v30h-.7z M103 4.5h.7v31h-.7z M104 7h.7v26h-.7z M105 13h.7v14h-.7z M106 13.5h.7v13h-.7z M107 6h.7v28h-.7z M108 5h.7v30h-.7z M109 5.5h.7v29h-.7z M110 10h.7v20h-.7z M111 11h.7v18h-.7z M112 16.5h.7v7h-.7z M118 13h.7v14h-.7z M119 4h.7v32h-.7z M120 4h.7v32h-.7z M121 8h.7v24h-.7z M122 7.5h.7v25h-.7z M123 10h.7v20h-.7z M124 8.5h.7v23h-.7z M125 3.5h.7v33h-.7z M126 2h.7v36h-.7z M127 4.5h.7v31h-.7z M128 13.5h.7v13h-.7z M129 15h.7v10h-.7z M130 10.5h.7v19h-.7z M131 5h.7v30h-.7z M132 8h.7v24h-.7z M133 9h.7v22h-.7z M134 8.5h.7v23h-.7z M135 8.5h.7v23h-.7z M136 12h.7v16h-.7z M137 5.5h.7v29h-.7z M138 2h.7v36h-.7z M139 3h.7v34h-.7z M140 8h.7v24h-.7z M141 10.5h.7v19h-.7z M142 4h.7v32h-.7z M143 3.5h.7v33h-.7z M144 5h.7v30h-.7z M145 8h.7v24h-.7z M146 8h.7v24h-.7z M147 9h.7v22h-.7z M148 9h.7v22h-.7z M149 15h.7v10h-.7z M150 17h.7v6h-.7z M151 10.5h.7v19h-.7z M152 7.5h.7v25h-.7z M153 6.5h.7v27h-.7z M154 14h.7v12h-.7z M155 8.5h.7v23h-.7z M156 7h.7v26h-.7z M157 8h.7v24h-.7z M158 9h.7v22h-.7z M159 8.5h.7v23h-.7z"/></defs>
+        <use class="wave-remaining" href="#wave-ai" fill="currentColor"/>
+      </svg>
+      <svg class="wave-played" viewBox="0 0 160 40" preserveAspectRatio="none"><use href="#wave-ai" fill="currentColor"/></svg>
+      <span class="wave-cursor"></span>
+      <span class="wave-cut" id="audio-cut" hidden></span>
+    </div>
+  </div>
+  <div class="audio-track audio-track-user" id="audio-track-user">
+    <header><strong>用户录音</strong><span id="audio-state-user">AliMeeting 真人语音</span></header>
+    <div class="wave" aria-hidden="true">
+      <svg viewBox="0 0 160 40" preserveAspectRatio="none">
+        <defs><path id="wave-user" d="M38 16h.7v8h-.7z M39 16h.7v8h-.7z M40 17h.7v6h-.7z M41 13.5h.7v13h-.7z M42 13.5h.7v13h-.7z M43 14h.7v12h-.7z M44 10.5h.7v19h-.7z M45 10h.7v20h-.7z M46 14h.7v12h-.7z M47 14h.7v12h-.7z M48 14.5h.7v11h-.7z M49 16h.7v8h-.7z M50 15.5h.7v9h-.7z M51 13.5h.7v13h-.7z M52 12h.7v16h-.7z M53 12h.7v16h-.7z M54 14.5h.7v11h-.7z M55 11.5h.7v17h-.7z M56 8.5h.7v23h-.7z M57 12.5h.7v15h-.7z M58 11.5h.7v17h-.7z M59 12h.7v16h-.7z M60 12h.7v16h-.7z M61 11.5h.7v17h-.7z M62 11h.7v18h-.7z M63 11.5h.7v17h-.7z M64 12.5h.7v15h-.7z M65 6.5h.7v27h-.7z M66 4.5h.7v31h-.7z M67 7h.7v26h-.7z M68 11h.7v18h-.7z M69 5h.7v30h-.7z M70 5h.7v30h-.7z M71 7h.7v26h-.7z M97 19h.7v2h-.7z M98 19h.7v2h-.7z M99 19h.7v2h-.7z M100 14h.7v12h-.7z M101 13.5h.7v13h-.7z M102 10.5h.7v19h-.7z M103 10.5h.7v19h-.7z M104 12h.7v16h-.7z M105 8.5h.7v23h-.7z M106 8h.7v24h-.7z M107 9h.7v22h-.7z M108 8h.7v24h-.7z M109 13.5h.7v13h-.7z M110 2h.7v36h-.7z M111 11h.7v18h-.7z M112 9.5h.7v21h-.7z M113 7h.7v26h-.7z M114 5.5h.7v29h-.7z M115 10h.7v20h-.7z M116 12.5h.7v15h-.7z M117 13h.7v14h-.7z M118 13.5h.7v13h-.7z M119 15.5h.7v9h-.7z M120 16.5h.7v7h-.7z M121 16h.7v8h-.7z M122 15h.7v10h-.7z M123 13.5h.7v13h-.7z M124 12.5h.7v15h-.7z M125 11.5h.7v17h-.7z M126 13h.7v14h-.7z M127 13.5h.7v13h-.7z M128 14h.7v12h-.7z M129 14.5h.7v11h-.7z M130 17h.7v6h-.7z M131 16h.7v8h-.7z M132 7.5h.7v25h-.7z M133 16h.7v8h-.7z M134 16.5h.7v7h-.7z M135 15.5h.7v9h-.7z M136 15.5h.7v9h-.7z M137 15h.7v10h-.7z M138 15h.7v10h-.7z M139 16.5h.7v7h-.7z M140 18h.7v4h-.7z M141 18.5h.7v3h-.7z M142 18.5h.7v3h-.7z M143 18.5h.7v3h-.7z M144 18.5h.7v3h-.7z M145 18.5h.7v3h-.7z M146 15.5h.7v9h-.7z M147 14.5h.7v11h-.7z M148 15.5h.7v9h-.7z M149 16h.7v8h-.7z"/></defs>
+        <use class="wave-remaining" href="#wave-user" fill="currentColor"/>
+      </svg>
+      <svg class="wave-played" viewBox="0 0 160 40" preserveAspectRatio="none"><use href="#wave-user" fill="currentColor"/></svg>
+      <span class="wave-cursor"></span>
+    </div>
+  </div>
+  <div class="audio-axis" aria-hidden="true"><span>0 秒</span><span>2</span><span>4</span><span>6</span><span>8 秒</span></div>
+</div>
+<ol class="audio-cues" id="audio-cues" aria-label="对话阶段">
+  <li aria-current="step"><strong>AI 讲会议安排</strong><span>正在播报</span></li>
+  <li><strong>用户「对对对」</strong><span>附和 · 继续播</span></li>
+  <li data-stop><strong>用户开口发言</strong><span>两块有效 · AI 停播</span></li>
+</ol>
 <p class="state" id="audio-status" role="status">等待播放</p>
+<details>
+<summary>查看逐块判断</summary>
 <ol id="audio-log" aria-label="试听中的交互记录"></ol>
+<p>每块 240 ms。回放读取预标分类，由页面执行继续播报和停播。</p>
+</details>
 <audio id="voice-ai" preload="auto" src="scene-ai.m4a" hidden></audio>
 <audio id="voice-user" preload="auto" src="scene-user.m4a" hidden></audio>
-<small>用户侧剪自下方两段 AliMeeting 真人录音。回放使用预标结果控制播报，可直接听到停播。</small>
+<small>用户侧剪自下方两段 AliMeeting 真人录音。</small>
 </section>
 
 <section aria-labelledby="real-title">
