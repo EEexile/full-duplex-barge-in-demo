@@ -26,6 +26,9 @@ a { color: var(--link); text-underline-offset: 3px; }
 .source { display: inline-block; margin-top: 8px; font-size: 14px; }
 section { margin-top: 22px; }
 audio { display: block; width: min(100%, 490px); margin: 9px 0 6px; }
+.recordings { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 10px 20px; }
+.recordings p { font-size: 14px; }
+.recording-credit { display: block; margin-top: 8px; }
 .controls, .outcomes { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 10px 0; }
 label { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px; }
 button, select {
@@ -80,6 +83,24 @@ textarea {
 <p>电话里，用户说「嗯嗯」时继续播，听到「等一下」就停。等问题说完整了，再接话。</p>
 <a class="source" href="https://github.com/EEexile/full-duplex-barge-in-demo">GitHub 仓库</a>
 </header>
+
+<section aria-labelledby="real-title">
+<h2 id="real-title">真人会议录音</h2>
+<div class="recordings">
+<div>
+<h3>两个人同时说话</h3>
+<audio controls preload="none" src="alimeeting-overlap.m4a" aria-label="真人会议：两个人同时说话"></audio>
+<p>约第 3 秒，两个人的话叠在一起。</p>
+</div>
+<div>
+<h3>说话时听到附和</h3>
+<audio controls preload="none" src="alimeeting-backchannel.m4a" aria-label="真人会议：说话时听到附和"></audio>
+<p>约第 2 秒，有人说「对对对」，原说话人继续讲。</p>
+</div>
+</div>
+<small class="recording-credit">这两段用于试听。录音来自 Alibaba Group 发布的 AliMeeting 测试集，从 Soul AI Lab 的公开视频中提取音轨、截取并转为 AAC。
+<a href="https://www.openslr.org/119/">AliMeeting</a> · <a href="https://soul-ailab.github.io/soulx-transcriber/#demos">原始预览</a> · <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a></small>
+</section>
 
 <section aria-labelledby="audio-title">
 <h2 id="audio-title">试听账单对话</h2>
