@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>全双工语音通话 · 中文电话</title>
+<link rel="stylesheet" href="/asset/call.css">
+<script src="/asset/app.js?v=4" defer></script>
+</head>
+<body>
+<main>
+  <header class="page-header">
+    <div><h1>全双工语音通话 Demo</h1><p>中文预约电话</p></div>
+  </header>
+  <div class="dashboard">
+    <section class="panel signals" aria-label="当前判断">
+      <h2>当前判断</h2>
+      <dl>
+        <div><dt>语音输入</dt><dd id="input-state">未接通</dd></div>
+        <div><dt>VAD</dt><dd id="vad">—</dd></div>
+        <div><dt>三分类</dt><dd id="classification">—</dd></div>
+        <div><dt>有效性</dt><dd id="validity">—</dd></div>
+        <div><dt>TurnSense</dt><dd id="turn-state">—</dd></div>
+      </dl>
+      <details open><summary>可以这样试</summary>
+        <ul>
+          <li>「对」<span>附和</span></li>
+          <li>「我想把预约改到明天下午四点」<span>有效发言</span></li>
+        </ul>
+      </details>
+    </section>
+    <section class="panel phone" aria-label="预约电话">
+      <p class="call-name">预约服务</p>
+      <div class="orb" id="orb" data-phase="idle">
+        <div class="wave" id="wave" aria-hidden="true"></div>
+        <strong id="call-state" role="status">等待接通</strong>
+        <time id="elapsed">00:00</time>
+      </div>
+      <button id="call" class="call-button">接通电话</button>
+      <button id="sample-mode" class="quiet-button">用录音体验</button>
+      <p id="hint" class="note">接通后可以用中文插话。建议戴耳机。</p>
+      <div id="samples" class="call-samples" hidden>
+        <button data-sample="noise">播放环境声</button>
+        <button data-sample="backchannel">播放附和</button>
+        <button data-sample="speech">播放有效发言</button>
+      </div>
+    </section>
+    <section class="panel trace" aria-label="通话事件">
+      <h2>通话事件</h2>
+      <ol id="events" aria-live="polite"></ol>
+    </section>
+    <section class="panel conversation" aria-label="播报记录">
+      <h2>播报记录</h2>
+      <ol id="transcript"></ol>
+    </section>
+  </div>
+</main>
+<audio id="speaker" preload="auto" src="/asset/greeting.m4a"></audio>
+</body>
+</html>
