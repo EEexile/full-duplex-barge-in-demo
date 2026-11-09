@@ -8,7 +8,7 @@
 
 接通预约助手，在 AI 说话时试试「对对对」或「等一下」。
 
-[开始通话](https://eeexile.github.io/full-duplex-barge-in-demo/) · [试听样例](https://eeexile.github.io/full-duplex-barge-in-demo/navigation.html)
+[开始通话](https://eeexile.github.io/full-duplex-barge-in-demo/)
 
 互动通话使用浏览器语音识别、规则判定和合成播报。
 
@@ -23,4 +23,4 @@
 | 2 · 有效发言 | 「我想再查一下……」 | 连续判为有效后停播 |
 | 3 · 明确打断 | 「等一下，我打断一下」 | 识别后停播，让用户说 |
 
-试听样例中的用户录音来自 [AliMeeting](https://www.openslr.org/119/) 的 R8002_M8002、R8009_M8022。
+
