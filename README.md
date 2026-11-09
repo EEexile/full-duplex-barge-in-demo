@@ -1,22 +1,22 @@
 # 全双工语音通话 Demo
 
-## 中文电话模型版
+[开始通话](https://eeexile-duplex-qwen-20261109.sublimeshell4.chatgpt.site)
 
-音频经过 Silero VAD 和流式三分类。连续两块有效发言会停播，TurnSense 判断说完后播放中文回复。可用麦克风或样例音频体验。[源码与启动说明](local-model-demo/)
+接通预约助手，在 AI 说话时试试「对对对」或「等一下」。实时字幕显示用户发言，Qwen 生成文字与语音回复。在线版需使用本人的 ChatGPT 账号登录，每次最多体验三分钟。
 
-## GitHub Pages 交互演示
+## Qwen 在线版
 
-接通预约助手，在 AI 说话时试试「对对对」或「等一下」。
+使用阿里云百炼 API：`qwen3.5-omni-flash` 生成对话和语音，`qwen3-asr-flash-realtime` 实时转写并更新字幕。麦克风音频通过云端后端连接模型，API Key 保存在后端。换电脑后也能打开，无需启动本机服务。
 
-[开始通话](https://eeexile.github.io/full-duplex-barge-in-demo/)
+AI 播报期间持续听取用户声音：先短暂停顿，附和后继续说，明确打断或持续发言则停播。在线版按转写文本和停顿判断；本地模型版使用声学分类模型与 TurnSense。
 
-互动通话使用浏览器语音识别、规则判定和合成播报。
-
-Qwen 接入方案采用阿里云百炼 API：`qwen3.5-omni-flash` 用于生成对话与语音回复，`qwen3-asr-flash-realtime` 用于实时转写、同步显示用户说话内容。目前两项接口已验证通过，尚未接入在线页面；API Key 由后端保存。
+[在线版后端源码](qwen-online-worker.mjs) · [本地模型版源码与启动说明](local-model-demo/)
 
 ## 系统架构
 
 ![全双工语音交互架构](architecture.svg)
+
+模型方案中，播报时区分以下四类；监听时先判断声音是否有效，有效语音交给 TurnSense 判断是否说完。
 
 | 分类 | 听到的声音 | 播报怎么处理 |
 | --- | --- | --- |
@@ -25,5 +25,8 @@ Qwen 接入方案采用阿里云百炼 API：`qwen3.5-omni-flash` 用于生成�
 | 2 · 有效发言 | 「我想再查一下……」 | 连续判为有效后停播 |
 | 3 · 明确打断 | 「等一下，我打断一下」 | 识别后停播，让用户说 |
 
+## 自行部署在线版
 
+将 `qwen-online-worker.mjs` 部署为 Cloudflare Worker ES module，在服务端配置 `DASHSCOPE_API_KEY`、`DASHSCOPE_BASE_URL`、`DASHSCOPE_REALTIME_URL`、`BAILIAN_CHAT_MODEL`、`BAILIAN_ASR_MODEL`。两个模型名分别为 `qwen3.5-omni-flash` 和 `qwen3-asr-flash-realtime`，接口地址使用百炼控制台对应地域的地址。
 
+网页和 WebSocket 接口由同一个 Worker 提供。自行部署时为入口配置访问限制；当前在线站点通过个人 ChatGPT 登录访问。
